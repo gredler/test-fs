@@ -1,0 +1,90 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'jacoco'
+
+group = 'net.gredler'
+archivesBaseName = 'test-fs'
+version = '0.1'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile 'junit:junit:4.12'
+}
+
+sourceCompatibility = 7
+targetCompatibility = 7
+compileJava.options.encoding = 'UTF-8'
+javadoc.options.encoding = 'UTF-8'
+
+jar.dependsOn 'check'
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.5'
+}
+
+/*------------------------------------------------------------------------------------------------*/
+/*                         CONFIGURATION FOR UPLOAD TO MAVEN CENTRAL REPO                         */
+/*                                                                                                */
+/* The signing credentials and Sonatype OSSRH credentials must be in the gradle.properties file.  */
+/* Upload to Maven Central with the command "gradlew uploadArchives".                             */
+/* http://central.sonatype.org/pages/gradle.html                                                  */
+/* http://central.sonatype.org/pages/ossrh-guide.html                                             */
+/*                                                                                                */
+/*------------------------------------------------------------------------------------------------*/
+
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from 'build/docs/javadoc'
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+uploadArchives {
+    repositories.mavenDeployer {
+        beforeDeployment {
+            MavenDeployment deployment -> signing.signPom(deployment)
+        }
+        repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
+            authentication(userName: sonatypeUsername, password: sonatypePassword)
+        }
+        pom.project {
+            name 'TestFS'
+            description 'TestFS is a file system test support library.'
+            packaging 'jar'
+            url 'https://github.com/gredler/test-fs'
+            scm {
+                connection 'scm:git:git://github.com/gredler/test-fs.git'
+                url 'https://github.com/gredler/test-fs'
+            }
+            licenses {
+                license {
+                    name 'The Apache License, Version 2.0'
+                    url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                }
+            }
+            developers {
+                developer {
+                    id 'gredler'
+                    name 'Daniel Gredler'
+                }
+            }
+        }
+    }
+}

@@ -22,7 +22,7 @@ of boilerplate code to set up (and shut down) correctly. It also [doesn't suppor
 some important features like file permissions.
 
 TestFS is another alternative, and takes a slightly different approach: rather than providing a custom file system that needs
-to be set up from scratch and then cleaned up after your test(s), it's a thin wrapper around [the default file
+to be set up from scratch and then cleaned up after your tests, it's a thin wrapper around [the default file
 system](http://docs.oracle.com/javase/7/docs/api/java/nio/file/FileSystems.html#getDefault%28%29), with extra functionality
 that allows you to selectively hide files, add simulated files, or simulate different permissions on existing files. This
 alternative approach, which allows you to start with the default file system and then tweak its behavior without modifying

@@ -76,19 +76,25 @@ You can then use TestFS to easily simulate different test scenarios:
 
     @Test
     public void testCheckLicenseSuccess() {
-        FileSystem fs = new TestFS().addingFile("user.license", "src/test/resources/sample.license").create();
+        FileSystem fs = new TestFS()
+            .addingFile("user.license", "src/test/resources/sample.license")
+            .create();
         instance.checkLicense(fs);
     }
 
     @Test(expected = LicenseException.class)
     public void testCheckLicenseUnreadable() {
-        FileSystem fs = new TestFS().addingFile("user.license", "src/test/resources/sample.license", Permissions._WX).create();
+        FileSystem fs = new TestFS()
+            .addingFile("user.license", "src/test/resources/sample.license", Permissions._WX)
+            .create();
         instance.checkLicense(fs);
     }
 
     @Test(expected = LicenseException.class)
     public void testCheckLicenseInexistent() {
-        FileSystem fs = new TestFS().removingFiles("user.license").create();
+        FileSystem fs = new TestFS()
+            .removingFiles("user.license")
+            .create();
         instance.checkLicense(fs);
     }
 

@@ -1,19 +1,20 @@
 # TestFS [![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.html) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/net.gredler/test-fs/badge.svg)](https://maven-badges.herokuapp.com/maven-central/net.gredler/test-fs)
 
-Global state is bad. You know it, and you try to avoid it. But sometimes it's sneaky. Like all those `new File(myPath)`
-calls sprinkled around your code. How do you test that code? Well, you use a test path for `myPath`. Or if the path can't
-be changed, maybe you temporarily modify the file system before your test, and then roll back the changes after the test. Ick.
+Static state is bad. You know it, and you try to avoid it. But sometimes it's sneaky. That innocent-looking `new Date()`
+call is going behind your back and talking to the system clock. Similarly, those `new File(myPath)` calls are talking to
+the global file system. Java 8 introduced the [Clock](https://docs.oracle.com/javase/8/docs/api/java/time/Clock.html)
+abstraction to help with the date situation, but what about your file-dependent code?
 
-Java 7 introduced a new file system abstraction that can be used to eliminate this particular flavor of global state.
+Java 7 introduced a new file system abstraction that can be used to eliminate this particular flavor of static state.
 [FileSystemProviders](http://docs.oracle.com/javase/7/docs/api/java/nio/file/spi/FileSystemProvider.html) are associated
 with a URI scheme and provide access to [FileSystems](http://docs.oracle.com/javase/7/docs/api/java/nio/file/FileSystem.html),
 which themselves provide access to file [Paths](http://docs.oracle.com/javase/7/docs/api/java/nio/file/Path.html) and other
 file system attributes and services. These `Path`s can then be used to read from and write to the associated file system,
 using the [Files](http://docs.oracle.com/javase/7/docs/api/java/nio/file/Files.html) utility class.
 
-If you provide your file-dependent code with a `FileSystem` through which to interact with files, you remove this implicit
-global state, and open the door to the possibility of using one `FileSystem` at runtime and a different `FileSystem` during
-testing. But what `FileSystem` should you use during testing?
+If you provide your file-dependent code with a `FileSystem` instance through which to interact with files, you remove this
+implicit global state, and open the door to the possibility of using one `FileSystem` at runtime and a different `FileSystem`
+during testing. But what `FileSystem` should you use during testing?
 
 One option is Google's [Jimfs](https://github.com/google/jimfs), an in-memory `FileSystem` implementation that allows you to
 create a virtual file system according to your test needs. Jimfs is fast and powerful, but can require a significant amount
@@ -38,6 +39,8 @@ As an example, take the following application code:
             checkLicense(new FileInputStream(license));
         }
     }
+
+    checkLicense();
 
 Testing this code will likely involve the creation of temporary files that need to be cleaned up after your tests:
 
@@ -66,6 +69,8 @@ However, the application code can be refactored as follows:
         }
     }
 
+    checkLicense(FileSystems.getDefault());
+
 You can then use TestFS to easily simulate different test scenarios:
 
     @Test
@@ -85,3 +90,5 @@ You can then use TestFS to easily simulate different test scenarios:
         FileSystem fs = new TestFS().removingFiles("user.license").create();
         instance.checkLicense(fs);
     }
+
+See the JavaDoc of [the TestFS class](src/main/java/net/gredler/testfs/TestFS.java) for the full API documentation.

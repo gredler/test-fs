@@ -33,9 +33,9 @@ As an example, take the following application code:
     public void checkLicense() {
         File license = new File("user.license");
         if (!license.exists()) {
-            throw new LicenseException("License file '" + license.getPath() + "' does not exist.");
+            throw new LicenseException(license.getPath() + "' does not exist.");
         } else if (!license.canRead()) {
-            throw new LicenseException("License file '" + license.getPath() + "' cannot be read.");
+            throw new LicenseException(license.getPath() + "' cannot be read.");
         } else {
             checkLicense(new FileInputStream(license));
         }
@@ -62,9 +62,9 @@ However, the application code can be refactored as follows:
     public void checkLicense(FileSystem fs) {
         Path license = fs.getPath("user.license");
         if (!Files.exists(license)) {
-            throw new LicenseException("License file '" + license.getPath() + "' does not exist.");
+            throw new LicenseException(license.getPath() + "' does not exist.");
         } else if (!Files.isReadable(license)) {
-            throw new LicenseException("License file '" + license.getPath() + "' cannot be read.");
+            throw new LicenseException(license.getPath() + "' cannot be read.");
         } else {
             checkLicense(Files.newInputStream(license));
         }

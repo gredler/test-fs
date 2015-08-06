@@ -12,20 +12,21 @@ which themselves provide access to file [Paths](http://docs.oracle.com/javase/7/
 file system attributes and services. These `Path`s can then be used to read from and write to the associated file system,
 using the [Files](http://docs.oracle.com/javase/7/docs/api/java/nio/file/Files.html) utility class.
 
-If you provide your file-dependent code with a `FileSystem` instance through which to interact with files, you remove this
-implicit global state, and open the door to the possibility of using one `FileSystem` at runtime and a different `FileSystem`
-during testing. But what `FileSystem` should you use during testing?
+If you provide your file-dependent code with a `FileSystem` instance through which to interact with the file system, you
+remove this implicit global state, and open the door to the possibility of using one `FileSystem` at runtime and a different
+`FileSystem` during testing. But what `FileSystem` should you use during testing?
 
 One option is Google's [Jimfs](https://github.com/google/jimfs), an in-memory `FileSystem` implementation that allows you to
 create a virtual file system according to your test needs. Jimfs is fast and powerful, but can require a significant amount
-of boilerplate code to set up (and shut down) correctly.
+of boilerplate code to set up (and shut down) correctly. It also [doesn't support](https://github.com/google/jimfs#whats-supported)
+some important features like file permissions.
 
 TestFS is another alternative, and takes a slightly different approach: rather than providing a custom file system that needs
 to be set up from scratch and then cleaned up after your test(s), it's a thin wrapper around [the default file
 system](http://docs.oracle.com/javase/7/docs/api/java/nio/file/FileSystems.html#getDefault%28%29), with extra functionality
-that allows you to selectively hide files or add simulated files. This alternative approach, which allows you to start with
-the default file system and then tweak its behavior without modifying the actual file system, may in some cases be a better
-fit than the Jimfs approach of starting with a blank slate.
+that allows you to selectively hide files, add simulated files, or simulate different permissions on existing files. This
+alternative approach, which allows you to start with the default file system and then tweak its behavior without modifying
+the actual file system, may in some cases be a better fit than the Jimfs approach of starting with a blank slate.
 
 As an example, take the following application code:
 

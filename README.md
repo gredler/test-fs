@@ -30,72 +30,80 @@ the actual file system, may in some cases be a better fit than the Jimfs approac
 
 As an example, take the following application code:
 
-    public void checkLicense() {
-        File license = new File("user.license");
-        if (!license.exists()) {
-            throw new LicenseException(license.getPath() + "' does not exist.");
-        } else if (!license.canRead()) {
-            throw new LicenseException(license.getPath() + "' cannot be read.");
-        } else {
-            checkLicense(new FileInputStream(license));
-        }
+```java
+public void checkLicense() {
+    File license = new File("user.license");
+    if (!license.exists()) {
+        throw new LicenseException(license.getPath() + "' does not exist.");
+    } else if (!license.canRead()) {
+        throw new LicenseException(license.getPath() + "' cannot be read.");
+    } else {
+        checkLicense(new FileInputStream(license));
     }
+}
 
-    checkLicense();
+checkLicense();
+```
 
 Testing this code will likely involve the creation of temporary files that need to be cleaned up after your tests:
 
-    @Test
-    public void testCheckLicenseSuccess() throws IOException {
-        File src = new File("src/test/resources/sample.license");
-        File dest = new File("user.license");
-        FileUtils.copyFile(src, dest);
-        try {
-            instance.checkLicense();
-        } finally {
-            FileUtils.deleteQuietly(dest);
-        }
+```java
+@Test
+public void testCheckLicenseSuccess() throws IOException {
+    File src = new File("src/test/resources/sample.license");
+    File dest = new File("user.license");
+    FileUtils.copyFile(src, dest);
+    try {
+        instance.checkLicense();
+    } finally {
+        FileUtils.deleteQuietly(dest);
     }
+}
+```
 
 However, the application code can be refactored as follows:
 
-    public void checkLicense(FileSystem fs) {
-        Path license = fs.getPath("user.license");
-        if (!Files.exists(license)) {
-            throw new LicenseException(license.getPath() + "' does not exist.");
-        } else if (!Files.isReadable(license)) {
-            throw new LicenseException(license.getPath() + "' cannot be read.");
-        } else {
-            checkLicense(Files.newInputStream(license));
-        }
+```java
+public void checkLicense(FileSystem fs) {
+    Path license = fs.getPath("user.license");
+    if (!Files.exists(license)) {
+        throw new LicenseException(license.getPath() + "' does not exist.");
+    } else if (!Files.isReadable(license)) {
+        throw new LicenseException(license.getPath() + "' cannot be read.");
+    } else {
+        checkLicense(Files.newInputStream(license));
     }
+}
 
-    checkLicense(FileSystems.getDefault());
+checkLicense(FileSystems.getDefault());
+```
 
 You can then use TestFS to easily simulate different test scenarios:
 
-    @Test
-    public void testCheckLicenseSuccess() {
-        FileSystem fs = new TestFS()
-            .addingFile("user.license", "src/test/resources/sample.license")
-            .create();
-        instance.checkLicense(fs);
-    }
+```java
+@Test
+public void testCheckLicenseSuccess() {
+    FileSystem fs = new TestFS()
+        .addingFile("user.license", "src/test/resources/sample.license")
+        .create();
+    instance.checkLicense(fs);
+}
 
-    @Test(expected = LicenseException.class)
-    public void testCheckLicenseUnreadable() {
-        FileSystem fs = new TestFS()
-            .addingFile("user.license", "src/test/resources/sample.license", Permissions._WX)
-            .create();
-        instance.checkLicense(fs);
-    }
+@Test(expected = LicenseException.class)
+public void testCheckLicenseUnreadable() {
+    FileSystem fs = new TestFS()
+        .addingFile("user.license", "src/test/resources/sample.license", Permissions._WX)
+        .create();
+    instance.checkLicense(fs);
+}
 
-    @Test(expected = LicenseException.class)
-    public void testCheckLicenseInexistent() {
-        FileSystem fs = new TestFS()
-            .removingFiles("user.license")
-            .create();
-        instance.checkLicense(fs);
-    }
+@Test(expected = LicenseException.class)
+public void testCheckLicenseInexistent() {
+    FileSystem fs = new TestFS()
+        .removingFiles("user.license")
+        .create();
+    instance.checkLicense(fs);
+}
+```
 
 See the JavaDoc of [the TestFS class](src/main/java/net/gredler/testfs/TestFS.java) for the full API documentation.

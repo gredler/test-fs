@@ -2,6 +2,7 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'findbugs'
 apply plugin: 'pmd'
+apply plugin: 'checkstyle'
 apply plugin: 'jacoco'
 
 group = 'net.gredler'
@@ -21,6 +22,7 @@ targetCompatibility = 7
 compileJava.options.encoding = 'UTF-8'
 javadoc.options.encoding = 'UTF-8'
 
+checkstyle.configFile = file('checkstyle.xml')
 jar.dependsOn 'check'
 
 task wrapper(type: Wrapper) {

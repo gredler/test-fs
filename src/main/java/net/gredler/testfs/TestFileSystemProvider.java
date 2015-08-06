@@ -58,22 +58,22 @@ final class TestFileSystemProvider extends FileSystemProvider {
     /** The wrapped file system provider. */
     private final FileSystemProvider provider;
 
-    /** Paths that don't exist in the context of this file system provider. */
+    /** Paths that don't exist in this file system provider. */
     private final List< Path > removedPaths;
 
-    /** Targets for additional paths that only exist in the context of this file system provider. */
+    /** Targets for additional paths that only exist in this file system provider. */
     private final Map< Path, Path > addedPathTargets;
 
-    /** Permissions for additional paths that only exist in the context of this file system provider. */
+    /** Permissions for additional paths that only exist in this file system provider. */
     private final Map< Path, Permissions > addedPathPermissions;
 
     /**
      * Creates a new instance.
      *
      * @param fs the wrapped file system
-     * @param removedPaths paths that don't exist in the context of this file system provider
-     * @param addedPathTargets targets for additional paths that only exist in the context of this file system provider
-     * @param addedPathPermissions permissions for additional paths that only exist in the context of this file system provider
+     * @param removedPaths paths that don't exist in this file system provider
+     * @param addedPathTargets targets for additional paths that only exist in this file system provider
+     * @param addedPathPermissions permissions for additional paths that only exist in this file system provider
      */
     TestFileSystemProvider(FileSystem fs, List< String > removedPaths, Map< String, String > addedPathTargets,
                     Map< String, Permissions > addedPathPermissions) {
@@ -124,8 +124,8 @@ final class TestFileSystemProvider extends FileSystemProvider {
 
     /** {@inheritDoc} */
     @Override
-    public SeekableByteChannel newByteChannel(Path path, Set< ? extends OpenOption > options, FileAttribute< ? >... attrs)
-                    throws IOException {
+    public SeekableByteChannel newByteChannel(Path path, Set< ? extends OpenOption > options,
+                    FileAttribute< ? >... attrs) throws IOException {
 
         path = ((TestPath) path).unwrap();
 
@@ -310,7 +310,8 @@ final class TestFileSystemProvider extends FileSystemProvider {
 
     /** {@inheritDoc} */
     @Override
-    public Map< String, Object > readAttributes(Path path, String attributes, LinkOption... options) throws IOException {
+    public Map< String, Object > readAttributes(Path path, String attributes, LinkOption... options)
+                    throws IOException {
 
         path = ((TestPath) path).unwrap();
 

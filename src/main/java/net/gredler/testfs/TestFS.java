@@ -29,20 +29,21 @@ import java.util.Map;
 
 /**
  * <p>
- * Test file system builder. A test file system simply wraps the default file system, allowing the user to simulate the existence
- * or non-existence of certain individual files.
+ * Test file system builder. A test file system simply wraps the default file system, allowing the user to
+ * simulate the existence or non-existence of certain individual files.
  *
  * <p>
- * For example, the following test file system behaves exactly like the default file system, with all reads and writes passing
- * through to the default file system:
+ * For example, the following test file system behaves exactly like the default file system, with all reads
+ * and writes passing through to the default file system:
  *
  * <pre>{@code
  * FileSystem fs = new TestFS().create();
  * }</pre>
  *
  * <p>
- * The following test file system also behaves exactly like the default file system, except that the files <code>/test/file1.log</code>
- * and <code>/test/file2.log</code> don't appear to exist, even if in reality they do exist:
+ * The following test file system also behaves exactly like the default file system, except that the files
+ * <code>/test/file1.log</code> and <code>/test/file2.log</code> don't appear to exist, even if in reality
+ * they do exist:
  *
  * <pre>{@code
  * FileSystem fs = new TestFS()
@@ -51,7 +52,8 @@ import java.util.Map;
  * }</pre>
  *
  * <p>
- * The following test file system behaves exactly like the default file system, but simulates a read-only temporary directory:
+ * The following test file system behaves exactly like the default file system, but simulates a read-only
+ * temporary directory:
  *
  * <pre>{@code
  * String tempDir = System.getProperty("java.io.tmpdir");
@@ -61,9 +63,10 @@ import java.util.Map;
  * }</pre>
  *
  * <p>
- * The following test file system behaves exactly like the default file system, except that the files <code>/test/file1.log</code> and
- * <code>/test/file2.log</code> exist but aren't writable, regardless of whether or not they exist in reality, and regardless of whether
- * or not they are writable in reality. If either simulated file is read from, the read will be delegated to the file at
+ * The following test file system behaves exactly like the default file system, except that the files
+ * <code>/test/file1.log</code> and <code>/test/file2.log</code> exist but aren't writable, regardless of
+ * whether or not they exist in reality, and regardless of whether or not they are writable in reality.
+ * If either simulated file is read from, the read will be delegated to the file at
  * <code>src/test/resources/my.log</code>.
  *
  * <pre>{@code
@@ -75,13 +78,22 @@ import java.util.Map;
  */
 public final class TestFS {
 
-    /** Paths to files that should not exist in the test file system, regardless of whether or not they actually exist. */
+    /**
+     * Paths to files that should not exist in the test file system,
+     * regardless of whether or not they actually exist.
+     */
     private final List< String > removedPaths;
 
-    /** Target paths for files that should exist in the test file system, regardless of whether or not they actually exist. */
+    /**
+     * Target paths for files that should exist in the test file system,
+     * regardless of whether or not they actually exist.
+     */
     private final Map< String, String > addedPathTargets;
 
-    /** Permissions for files that should exist in the test file system, regardless of whether or not they actually exist. */
+    /**
+     * Permissions for files that should exist in the test file system,
+     * regardless of whether or not they actually exist.
+     */
     private final Map< String, Permissions > addedPathPermissions;
 
     /**
@@ -97,7 +109,7 @@ public final class TestFS {
      * Simulates the existence of the specified file path, regardless of whether or not it actually exists.
      *
      * @param path the path of the file that should exist in the context of the test file system
-     * @param targetPath path to an existing file to which reads and other file system operations will be delegated (this file must exist)
+     * @param targetPath path to an existing file to which reads and other file system operations will be delegated
      * @return this test file system builder, ready for further customization
      * @throws IllegalArgumentException if the specified target file does not exist
      */
@@ -109,7 +121,7 @@ public final class TestFS {
      * Simulates the existence of the specified file path, regardless of whether or not it actually exists.
      *
      * @param path the path of the file that should exist in the context of the test file system
-     * @param targetPath path to an existing file to which reads and other file system operations will be delegated (this file must exist)
+     * @param targetPath path to an existing file to which reads and other file system operations will be delegated
      * @param permissions custom read/write/execute permissions to apply to the simulated file
      * @return this test file system builder, ready for further customization
      * @throws IllegalArgumentException if the specified target file does not exist
@@ -140,7 +152,7 @@ public final class TestFS {
     /**
      * Simulates the specified permissions on the specified file.
      *
-     * @param path the path of the file whose permissions are to be simulated (this file must exist)
+     * @param path the path of the file whose permissions are to be simulated
      * @param permissions the simulated permissions to use for the specified file
      * @return this test file system builder, ready for further customization
      * @throws IllegalArgumentException if the specified file does not exist
@@ -157,8 +169,8 @@ public final class TestFS {
      */
     public FileSystem create() {
         FileSystem fs = FileSystems.getDefault();
-        TestFileSystemProvider provider = new TestFileSystemProvider(fs, removedPaths, addedPathTargets, addedPathPermissions);
-        return new TestFileSystem(fs, provider);
+        TestFileSystemProvider p = new TestFileSystemProvider(fs, removedPaths, addedPathTargets, addedPathPermissions);
+        return new TestFileSystem(fs, p);
     }
 
     /**

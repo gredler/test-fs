@@ -5,7 +5,7 @@ call is going behind your back and talking to the system clock. Similarly, those
 the global file system. Java 8 introduced the [Clock](https://docs.oracle.com/javase/8/docs/api/java/time/Clock.html)
 abstraction to help with the date situation, but what about your file-dependent code?
 
-Java 7 introduced a new file system abstraction that can be used to eliminate this particular flavor of static state.
+Java 7 added a new file system abstraction that can be used to eliminate this particular flavor of static state.
 [FileSystemProviders](http://docs.oracle.com/javase/7/docs/api/java/nio/file/spi/FileSystemProvider.html) are associated
 with a URI scheme and provide access to [FileSystems](http://docs.oracle.com/javase/7/docs/api/java/nio/file/FileSystem.html),
 which themselves provide access to file [Paths](http://docs.oracle.com/javase/7/docs/api/java/nio/file/Path.html) and other

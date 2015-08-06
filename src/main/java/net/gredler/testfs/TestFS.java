@@ -45,7 +45,19 @@ import java.util.Map;
  * and <code>/test/file2.log</code> don't appear to exist, even if in reality they do exist:
  *
  * <pre>{@code
- * FileSystem fs = new TestFS().removingFiles("/test/file1.log", "/test/file2.log").create();
+ * FileSystem fs = new TestFS()
+ *     .removingFiles("/test/file1.log", "/test/file2.log")
+ *     .create();
+ * }</pre>
+ *
+ * <p>
+ * The following test file system behaves exactly like the default file system, but simulates a read-only temporary directory:
+ *
+ * <pre>{@code
+ * String tempDir = System.getProperty("java.io.tmpdir");
+ * FileSystem fs = new TestFS()
+ *     .alteringPermissions(tempDir, Permissions.R_X)
+ *     .create();
  * }</pre>
  *
  * <p>

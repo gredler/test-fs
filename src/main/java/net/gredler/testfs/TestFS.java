@@ -17,6 +17,8 @@
 
 package net.gredler.testfs;
 
+import java.io.IOException;
+import java.nio.file.AccessMode;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -24,8 +26,10 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * <p>
@@ -97,12 +101,19 @@ public final class TestFS {
     private final Map< String, Permissions > addedPathPermissions;
 
     /**
+     * Access to these files using these access modes should trigger
+     * an {@link IOException}.
+     */
+    private final Map< String, Set< AccessMode > > exceptionPaths;
+
+    /**
      * Creates a new test file system builder.
      */
     public TestFS() {
         removedPaths = new ArrayList<>();
         addedPathTargets = new HashMap<>();
         addedPathPermissions = new HashMap<>();
+        exceptionPaths = new HashMap<>();
     }
 
     /**
@@ -163,13 +174,53 @@ public final class TestFS {
     }
 
     /**
+     * Simulates an {@link IOException} whenever the contents of the specified files are read.
+     *
+     * @param paths the paths of the files which are to trigger an {@link IOException} on read
+     * @return this test file system builder, ready for further customization
+     */
+    public TestFS throwingExceptionOnRead(String... paths) {
+        return throwingException(paths, AccessMode.READ);
+    }
+
+    /**
+     * Simulates an {@link IOException} whenever the specified files are written to.
+     *
+     * @param paths the paths of the files which are to trigger an {@link IOException} on write
+     * @return this test file system builder, ready for further customization
+     */
+    public TestFS throwingExceptionOnWrite(String... paths) {
+        return throwingException(paths, AccessMode.WRITE);
+    }
+
+    /**
+     * Simulates an {@link IOException} whenever the specified files are read from or written to.
+     *
+     * @param paths the paths of the files which are to trigger an {@link IOException} on read or write
+     * @param mode the access mode that should trigger the {@link IOException} (read or write)
+     * @return this test file system builder, ready for further customization
+     */
+    private TestFS throwingException(String[] paths, AccessMode mode) {
+        for (String path : paths) {
+            Set< AccessMode > modes = exceptionPaths.get(path);
+            if (modes == null) {
+                modes = new HashSet<>(3);
+                exceptionPaths.put(path, modes);
+            }
+            modes.add(mode);
+        }
+        return this;
+    }
+
+    /**
      * Creates and returns the test file system.
      *
      * @return the test file system
      */
     public FileSystem create() {
         FileSystem fs = FileSystems.getDefault();
-        TestFileSystemProvider p = new TestFileSystemProvider(fs, removedPaths, addedPathTargets, addedPathPermissions);
+        TestFileSystemProvider p = new TestFileSystemProvider(fs, removedPaths,
+                        addedPathTargets, addedPathPermissions, exceptionPaths);
         return new TestFileSystem(fs, p);
     }
 

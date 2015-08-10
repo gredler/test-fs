@@ -170,12 +170,36 @@ public class TestFSTest {
     }
 
     @Test
+    public void testReadFileWithSimulatedIOException() throws IOException {
+
+        FileSystem fs = new TestFS().throwingExceptionOnRead(SIMPLE_TXT).create();
+        Path path = fs.getPath(SIMPLE_TXT);
+
+        expectedException.expect(IOException.class);
+        expectedException.expectMessage(path.toString());
+
+        Files.readAllLines(path);
+    }
+
+    @Test
     public void testWriteToRemovedFile() throws IOException {
 
         FileSystem fs = new TestFS().removingFiles(SIMPLE_TXT).create();
         Path path = fs.getPath(SIMPLE_TXT);
 
         expectedException.expect(NoSuchFileException.class);
+        expectedException.expectMessage(path.toString());
+
+        Files.write(path, Arrays.asList("foo"));
+    }
+
+    @Test
+    public void testWriteToFileWithSimulatedIOException() throws IOException {
+
+        FileSystem fs = new TestFS().throwingExceptionOnWrite(SIMPLE_TXT).create();
+        Path path = fs.getPath(SIMPLE_TXT);
+
+        expectedException.expect(IOException.class);
         expectedException.expectMessage(path.toString());
 
         Files.write(path, Arrays.asList("foo"));

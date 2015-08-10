@@ -67,6 +67,9 @@ final class TestFileSystemProvider extends FileSystemProvider {
     /** Permissions for additional paths that only exist in this file system provider. */
     private final Map< Path, Permissions > addedPathPermissions;
 
+    /** Access to these files using these access modes should trigger an {@link IOException}. */
+    private final Map< Path, Set< AccessMode > > exceptionPaths;
+
     /**
      * Creates a new instance.
      *
@@ -74,9 +77,10 @@ final class TestFileSystemProvider extends FileSystemProvider {
      * @param removedPaths paths that don't exist in this file system provider
      * @param addedPathTargets targets for additional paths that only exist in this file system provider
      * @param addedPathPermissions permissions for additional paths that only exist in this file system provider
+     * @param exceptionPaths access to these files using these access modes should trigger an {@link IOException}
      */
     TestFileSystemProvider(FileSystem fs, List< String > removedPaths, Map< String, String > addedPathTargets,
-                    Map< String, Permissions > addedPathPermissions) {
+                    Map< String, Permissions > addedPathPermissions, Map< String, Set< AccessMode > > exceptionPaths) {
 
         this.provider = fs.provider();
 
@@ -95,6 +99,11 @@ final class TestFileSystemProvider extends FileSystemProvider {
         for (Map.Entry< String, Permissions > addedPathPermission : addedPathPermissions.entrySet()) {
             this.addedPathPermissions.put(fs.getPath(addedPathPermission.getKey()).toAbsolutePath(),
                             addedPathPermission.getValue());
+        }
+
+        this.exceptionPaths = new HashMap<>();
+        for (Map.Entry< String, Set< AccessMode > > entry : exceptionPaths.entrySet()) {
+            this.exceptionPaths.put(fs.getPath(entry.getKey()).toAbsolutePath(), entry.getValue());
         }
     }
 
@@ -130,7 +139,7 @@ final class TestFileSystemProvider extends FileSystemProvider {
         path = ((TestPath) path).unwrap();
 
         checkIfRemoved(path);
-        checkPermissions(path, toAccessModes(options));
+        checkPermissions(path, true, toAccessModes(options));
 
         Path target = addedPathTargets.get(path.toAbsolutePath());
         if (target != null) {
@@ -162,7 +171,7 @@ final class TestFileSystemProvider extends FileSystemProvider {
         dir = ((TestPath) dir).unwrap();
 
         checkIfRemoved(dir);
-        checkPermissions(dir, AccessMode.READ);
+        checkPermissions(dir, true, AccessMode.READ);
 
         return provider.newDirectoryStream(dir, filter);
     }
@@ -176,7 +185,7 @@ final class TestFileSystemProvider extends FileSystemProvider {
         Path parent = dir.getParent();
         if (parent != null) {
             checkIfRemoved(parent);
-            checkPermissions(parent, AccessMode.WRITE);
+            checkPermissions(parent, true, AccessMode.WRITE);
         }
 
         provider.createDirectory(dir, attrs);
@@ -192,7 +201,7 @@ final class TestFileSystemProvider extends FileSystemProvider {
 
         Path parent = path.getParent();
         if (parent != null) {
-            checkPermissions(parent, AccessMode.WRITE);
+            checkPermissions(parent, true, AccessMode.WRITE);
         }
 
         provider.delete(path);
@@ -206,7 +215,7 @@ final class TestFileSystemProvider extends FileSystemProvider {
         target = ((TestPath) target).unwrap();
 
         checkIfRemoved(source);
-        checkPermissions(source, AccessMode.READ);
+        checkPermissions(source, true, AccessMode.READ);
 
         provider.copy(source, target, options);
     }
@@ -223,13 +232,13 @@ final class TestFileSystemProvider extends FileSystemProvider {
         Path sourceParent = source.getParent();
         if (sourceParent != null) {
             checkIfRemoved(sourceParent);
-            checkPermissions(sourceParent, AccessMode.WRITE);
+            checkPermissions(sourceParent, true, AccessMode.WRITE);
         }
 
         Path targetParent = target.getParent();
         if (targetParent != null) {
             checkIfRemoved(targetParent);
-            checkPermissions(targetParent, AccessMode.WRITE);
+            checkPermissions(targetParent, true, AccessMode.WRITE);
         }
 
         provider.move(source, target, options);
@@ -275,7 +284,7 @@ final class TestFileSystemProvider extends FileSystemProvider {
 
         checkIfRemoved(path);
 
-        boolean checked = checkPermissions(path, modes);
+        boolean checked = checkPermissions(path, false, modes);
         if (!checked) {
             provider.checkAccess(path, modes);
         }
@@ -372,7 +381,8 @@ final class TestFileSystemProvider extends FileSystemProvider {
         }
     }
 
-    private boolean checkPermissions(Path path, AccessMode... modes) throws AccessDeniedException {
+    private boolean checkPermissions(Path path, boolean checkExceptions, AccessMode... modes)
+                    throws AccessDeniedException, IOException {
         Permissions permissions = addedPathPermissions.get(path.toAbsolutePath());
         boolean hasPermissions = permissions != null;
         if (hasPermissions) {
@@ -398,6 +408,20 @@ final class TestFileSystemProvider extends FileSystemProvider {
                 }
             }
         }
+        if (checkExceptions) {
+            checkExceptions(path, modes);
+        }
         return hasPermissions;
+    }
+
+    private void checkExceptions(Path path, AccessMode... modes) throws IOException {
+        Set< AccessMode > errorModes = exceptionPaths.get(path.toAbsolutePath());
+        if (errorModes != null) {
+            for (AccessMode mode : modes) {
+                if (errorModes.contains(mode)) {
+                    throw new IOException(path.toString());
+                }
+            }
+        }
     }
 }

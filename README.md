@@ -1,5 +1,26 @@
 # TestFS [![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.html) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/net.gredler/test-fs/badge.svg)](https://maven-badges.herokuapp.com/maven-central/net.gredler/test-fs)
 
+```java
+// Give me access to the file system...
+FileSystem fs = new TestFS()
+    // ... but pretend that these files doesn't exist, even if they do
+    .removingFiles("config/user.properties", "config/startup.properties")
+    // ... and pretend that this file exists and contains my sample license
+    .addingFile("user1.license", "src/test/resources/sample.license", Permissions.RWX)
+    // ... and pretend that this file exists, contains my sample license, but isn't readable
+    .addingFile("user2.license", "src/test/resources/sample.license", Permissions._WX)
+    // ... and I'm sure this file exists, but I want to pretend that it isn't writable
+    .alteringPermissions("src/test/resources/input.xml", Permissions.R_X)
+    // ... and please throw an IOException if I try to read the contents of this file
+    .throwingExceptionOnRead("/opt/app/config.xml")
+    // ... and please throw an IOException if I try to write to this file
+    .throwingExceptionOnWrite("/opt/app/output.log")
+    // ... k thanks!
+    .create();
+```
+
+##Why?
+
 Static state is bad. You know it, and you try to avoid it. But sometimes it's sneaky. That innocent-looking `new Date()`
 call is going behind your back and talking to the system clock. Similarly, those `new File(myPath)` calls are talking to
 the global file system. Java 8 introduced the [Clock](https://docs.oracle.com/javase/8/docs/api/java/time/Clock.html)
@@ -27,6 +48,8 @@ system](http://docs.oracle.com/javase/7/docs/api/java/nio/file/FileSystems.html#
 that allows you to selectively hide files, add simulated files, or simulate different permissions on existing files. This
 alternative approach, which allows you to start with the default file system and then tweak its behavior without modifying
 the actual file system, may in some cases be a better fit than the Jimfs approach of starting with a blank slate.
+
+##Example
 
 As an example, take the following application code:
 

@@ -7,7 +7,7 @@ FileSystem fs = new TestFS()
     .removingFiles("config/user.properties", "config/startup.properties")
     // ... and pretend that this file exists and contains my sample license
     .addingFile("user1.license", "src/test/resources/sample.license", Permissions.RWX)
-    // ... and pretend that this file exists, contains my sample license, but isn't readable
+    // ... and pretend this file exists, contains my sample license, but isn't readable
     .addingFile("user2.license", "src/test/resources/sample.license", Permissions._WX)
     // ... and I'm sure this file exists, but I want to pretend that it isn't writable
     .alteringPermissions("src/test/resources/input.xml", Permissions.R_X)

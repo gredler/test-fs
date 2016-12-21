@@ -1,4 +1,4 @@
-# TestFS [![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.html) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/net.gredler/test-fs/badge.svg)](https://maven-badges.herokuapp.com/maven-central/net.gredler/test-fs)
+# TestFS [![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.html) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/net.gredler/test-fs/badge.svg)](https://maven-badges.herokuapp.com/maven-central/net.gredler/test-fs) [![Build Status](https://travis-ci.org/gredler/test-fs.svg?branch=master)](https://travis-ci.org/gredler/test-fs)
 
 ```java
 // Give me access to the file system...

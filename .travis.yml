@@ -1,3 +1,4 @@
 language: java
 before_script:
+  - ls
   - cp gradle.properties.skeleton gradle.properties

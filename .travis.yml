@@ -1,4 +1,7 @@
 language: java
+before_install:
+  - ls -la
+  - cp gradle.properties.skeleton gradle.properties
 before_script:
   - ls
   - cp gradle.properties.skeleton gradle.properties
